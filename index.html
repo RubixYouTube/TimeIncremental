@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Game Title</title>
+    <style>
+        body {
+            background-color: black;
+            color: darkgrey;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: darkcyan;
+            padding: 10px;
+        }
+
+        #mainContent,
+        #optionsContent,
+        #achievementContent {
+            display: none;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 125%;
+        }
+
+        #timer {
+            font-size: 125%;
+        }
+
+        #version {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        button {
+            background-color: cyan;
+            color: black;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .achievement-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .not-completed,
+        .completed {
+            width: 100%;
+            padding: 10px;
+            margin: 5px;
+            text-align: center;
+            border: 2px solid darkgrey;
+            transition: border-color 0.5s ease;
+        }
+
+        .not-completed:hover {
+            border-color: lightcoral;
+        }
+
+        .completed {
+            background-color: rgba(0, 255, 0, 0.1);
+            border-color: darkgreen;
+            animation: achievementComplete 1s ease;
+        }
+
+        @keyframes achievementComplete {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .pop-up {
+            display: none;
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: darkgoldenrod;
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            animation: popUpAnimation 0.5s ease;
+        }
+
+        @keyframes popUpAnimation {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="tabs">
+        <div onclick="showTab('mainContent')">Main</div>
+        <div onclick="showTab('optionsContent')">Options</div>
+        <div onclick="showTab('achievementContent')">Achievement</div>
+    </div>
+
+    <div id="mainContent">
+        <div id="timer">You waited 0 years, 0 months, 0 days, 0 hours, 0 minutes, 0 seconds</div>
+        <button onclick="gainTime()">Gain Time</button>
+    </div>
+
+    <div id="optionsContent">
+        <p>The option is w.i.p</p>
+    </div>
+
+    <div id="achievementContent">
+        <h1>Achievements</h1>
+        <div class="achievement-container">
+            <div class="not-completed" id="achievement1" onclick="completeAchievement('First second!!.!.!.!')">First second!!.!.!.!</div>
+            <div class="not-completed" id="achievement2" onclick="completeAchievement('1 minute')">1 minute</div>
+            <div class="not-completed" id="achievement3" onclick="completeAchievement('120 seconds')">120 seconds</div>
+        </div>
+    </div>
+
+    <div id="version">v0.0.1p</div>
+    <div class="pop-up" id="popUp"></div>
+
+    <script>
+        let time = 0;
+        let achievements = {
+            achievement1: false,
+            achievement2: false,
+            achievement3: false
+        };
+
+        function showTab(tabId) {
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('optionsContent').style.display = 'none';
+            document.getElementById('achievementContent').style.display = 'none';
+
+            document.getElementById(tabId).style.display = 'block';
+
+            if (tabId === 'achievementContent') {
+                updateAchievements();
+            }
+        }
+
+        function gainTime() {
+            time++;
+            updateTimer();
+            checkAchievements();
+        }
+
+        function updateTimer() {
+            const years = Math.floor(time / (365 * 24 * 60 * 60));
+            const months = Math.floor((time % (365 * 24 * 60 * 60)) / (30 * 24 * 60 * 60));
+            const days = Math.floor((time % (30 * 24 * 60 * 60)) / (24 * 60 * 60));
+            const hours = Math.floor((time % (24 * 60 * 60)) / (60 * 60));
+            const minutes = Math.floor((time % (60 * 60)) / 60);
+            const seconds = time % 60;
+
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = `You waited ${years} years, ${months} months, ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+        }
+
+        function checkAchievements() {
+            if (time === 1 && !achievements.achievement1) {
+                achievements.achievement1 = true;
+                document.getElementById('achievement1').textContent = 'First second!!.!.!.! (Completed)';
+                document.getElementById('achievement1').classList.remove('not-completed');
+                document.getElementById('achievement1').classList.add('completed');
+                showPopUp('First second!!.!.!.!');
+            }
+
+            if (time === 60 && !achievements.achievement2) {
+                achievements.achievement2 = true;
+                document.getElementById('achievement2').textContent = '1 minute (Completed)';
+                document.getElementById('achievement2').classList.remove('not-completed');
+                document.getElementById('achievement2').classList.add('completed');
+                showPopUp('1 minute');
+            }
+
+            if (time === 120 && !achievements.achievement3) {
+                achievements.achievement3 = true;
+                document.getElementById('achievement3').textContent = '120 seconds (Completed)';
+                document.getElementById('achievement3').classList.remove('not-completed');
+                document.getElementById('achievement3').classList.add('completed');
+                showPopUp('120 seconds');
+            }
+        }
+
+        function updateAchievements() {
+            for (const achievement in achievements) {
+                const achievementElement = document.getElementById(achievement);
+                if (achievements[achievement]) {
+                    achievementElement.textContent = achievementElement.textContent.replace('(Completed)', '') + ' (Completed)';
+                    achievementElement.classList.remove('not-completed');
+                    achievementElement.classList.add('completed');
+                } else {
+                    achievementElement.classList.remove('completed');
+                    achievementElement.classList.add('not-completed');
+                }
+            }
+        }
+
+        function completeAchievement(achievementText) {
+            showPopUp(achievementText);
+        }
+
+        function showPopUp(achievementText) {
+            const popUpElement = document.getElementById('popUp');
+            popUpElement.textContent = `Achievement Complete: ${achievementText}`;
+            popUpElement.style.display = 'block';
+
+            setTimeout(() => {
+                popUpElement.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
