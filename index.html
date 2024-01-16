@@ -64,7 +64,7 @@
             margin: 5px;
             text-align: center;
             border: 2px solid darkgrey;
-            transition: border-color 0.5s ease;
+            cursor: pointer;
         }
 
         .not-completed:hover {
@@ -74,18 +74,6 @@
         .completed {
             background-color: rgba(0, 255, 0, 0.1);
             border-color: darkgreen;
-            animation: achievementComplete 1s ease;
-        }
-
-        @keyframes achievementComplete {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
 
         .pop-up {
@@ -94,10 +82,19 @@
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: darkgoldenrod;
-            color: black;
             padding: 10px;
             border-radius: 5px;
+        }
+
+        .red-pop-up {
+            background-color: darkred;
+            color: white;
+            animation: popUpAnimation 0.5s ease;
+        }
+
+        .green-pop-up {
+            background-color: darkgreen;
+            color: white;
             animation: popUpAnimation 0.5s ease;
         }
 
@@ -138,8 +135,9 @@
         </div>
     </div>
 
-    <div id="version">v0.0.1p</div>
-    <div class="pop-up" id="popUp"></div>
+    <div id="version">v0.0.2p</div>
+    <div class="pop-up red-pop-up" id="redPopUp"></div>
+    <div class="pop-up green-pop-up" id="greenPopUp"></div>
 
     <script>
         let time = 0;
@@ -185,7 +183,7 @@
                 document.getElementById('achievement1').textContent = 'First second!!.!.!.! (Completed)';
                 document.getElementById('achievement1').classList.remove('not-completed');
                 document.getElementById('achievement1').classList.add('completed');
-                showPopUp('First second!!.!.!.!');
+                showRedPopUp('First second!!.!.!.! (Completed)');
             }
 
             if (time === 60 && !achievements.achievement2) {
@@ -193,7 +191,7 @@
                 document.getElementById('achievement2').textContent = '1 minute (Completed)';
                 document.getElementById('achievement2').classList.remove('not-completed');
                 document.getElementById('achievement2').classList.add('completed');
-                showPopUp('1 minute');
+                showRedPopUp('1 minute (Completed)');
             }
 
             if (time === 120 && !achievements.achievement3) {
@@ -201,7 +199,7 @@
                 document.getElementById('achievement3').textContent = '120 seconds (Completed)';
                 document.getElementById('achievement3').classList.remove('not-completed');
                 document.getElementById('achievement3').classList.add('completed');
-                showPopUp('120 seconds');
+                showRedPopUp('120 seconds (Completed)');
             }
         }
 
@@ -209,7 +207,7 @@
             for (const achievement in achievements) {
                 const achievementElement = document.getElementById(achievement);
                 if (achievements[achievement]) {
-                    achievementElement.textContent = achievementElement.textContent.replace('(Completed)', '') + ' (Completed)';
+                    achievementElement.textContent = `${achievementElement.textContent.replace('(Completed)', '')} (Completed)`;
                     achievementElement.classList.remove('not-completed');
                     achievementElement.classList.add('completed');
                 } else {
@@ -220,16 +218,30 @@
         }
 
         function completeAchievement(achievementText) {
-            showPopUp(achievementText);
+            if (achievements[achievementText.toLowerCase()]) {
+                showGreenPopUp('The Achievement is already Completed');
+            } else {
+                showRedPopUp('The Achievement is not completed yet');
+            }
         }
 
-        function showPopUp(achievementText) {
-            const popUpElement = document.getElementById('popUp');
-            popUpElement.textContent = `Achievement Complete: ${achievementText}`;
-            popUpElement.style.display = 'block';
+        function showRedPopUp(text) {
+            const redPopUpElement = document.getElementById('redPopUp');
+            redPopUpElement.textContent = text;
+            redPopUpElement.style.display = 'block';
 
             setTimeout(() => {
-                popUpElement.style.display = 'none';
+                redPopUpElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function showGreenPopUp(text) {
+            const greenPopUpElement = document.getElementById('greenPopUp');
+            greenPopUpElement.textContent = text;
+            greenPopUpElement.style.display = 'block';
+
+            setTimeout(() => {
+                greenPopUpElement.style.display = 'none';
             }, 3000);
         }
     </script>
