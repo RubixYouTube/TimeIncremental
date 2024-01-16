@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Game Title</title>
+    <title>Time Incremental Again</title>
     <style>
         body {
             background-color: black;
@@ -43,8 +43,6 @@
         }
 
         button {
-            background-color: cyan;
-            color: black;
             padding: 10px;
             margin-top: 10px;
             cursor: pointer;
@@ -98,6 +96,18 @@
             animation: popUpAnimation 0.5s ease;
         }
 
+        .blue-pop-up {
+            background-color: darkblue;
+            color: white;
+            animation: popUpAnimation 0.5s ease;
+        }
+
+        .orange-pop-up {
+            background-color: darkorange;
+            color: white;
+            animation: popUpAnimation 0.5s ease;
+        }
+
         @keyframes popUpAnimation {
             from {
                 opacity: 0;
@@ -123,7 +133,8 @@
     </div>
 
     <div id="optionsContent">
-        <p>The option is w.i.p</p>
+        <button onclick="saveGame()">Save</button>
+        <button onclick="loadGame()">Load</button>
     </div>
 
     <div id="achievementContent">
@@ -135,9 +146,11 @@
         </div>
     </div>
 
-    <div id="version">v0.0.2p</div>
+    <div id="version">v0.0.3p</div>
     <div class="pop-up red-pop-up" id="redPopUp"></div>
     <div class="pop-up green-pop-up" id="greenPopUp"></div>
+    <div class="pop-up blue-pop-up" id="bluePopUp"></div>
+    <div class="pop-up orange-pop-up" id="orangePopUp"></div>
 
     <script>
         let time = 0;
@@ -242,6 +255,34 @@
 
             setTimeout(() => {
                 greenPopUpElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function saveGame() {
+            showBluePopUp('Saved');
+        }
+
+        function loadGame() {
+            showOrangePopUp('Loaded the save');
+        }
+
+        function showBluePopUp(text) {
+            const bluePopUpElement = document.getElementById('bluePopUp');
+            bluePopUpElement.textContent = text;
+            bluePopUpElement.style.display = 'block';
+
+            setTimeout(() => {
+                bluePopUpElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function showOrangePopUp(text) {
+            const orangePopUpElement = document.getElementById('orangePopUp');
+            orangePopUpElement.textContent = text;
+            orangePopUpElement.style.display = 'block';
+
+            setTimeout(() => {
+                orangePopUpElement.style.display = 'none';
             }, 3000);
         }
     </script>
