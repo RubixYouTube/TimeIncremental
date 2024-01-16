@@ -108,6 +108,12 @@
             animation: popUpAnimation 0.5s ease;
         }
 
+        .rainbow-pop-up {
+            background: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red);
+            color: white;
+            animation: popUpAnimation 0.5s ease;
+        }
+
         @keyframes popUpAnimation {
             from {
                 opacity: 0;
@@ -146,11 +152,12 @@
         </div>
     </div>
 
-    <div id="version">v0.0.4p</div>
+    <div id="version">v0.0.5p</div>
     <div class="pop-up red-pop-up" id="redPopUp"></div>
     <div class="pop-up green-pop-up" id="greenPopUp"></div>
     <div class="pop-up blue-pop-up" id="bluePopUp"></div>
     <div class="pop-up orange-pop-up" id="orangePopUp"></div>
+    <div class="pop-up rainbow-pop-up" id="rainbowPopUp"></div>
 
     <script>
         let time = 0;
@@ -196,7 +203,7 @@
                 document.getElementById('achievement1').textContent = 'First second!!.!.!.! (Completed)';
                 document.getElementById('achievement1').classList.remove('not-completed');
                 document.getElementById('achievement1').classList.add('completed');
-                showRedPopUp('First second!!.!.!.! (Completed)');
+                showRainbowPopUp('Achievement Complete: First second!!.!.!.!');
             }
 
             if (time === 60 && !achievements.achievement2) {
@@ -204,7 +211,7 @@
                 document.getElementById('achievement2').textContent = '1 minute (Completed)';
                 document.getElementById('achievement2').classList.remove('not-completed');
                 document.getElementById('achievement2').classList.add('completed');
-                showRedPopUp('1 minute (Completed)');
+                showRainbowPopUp('Achievement Complete: 1 minute');
             }
 
             if (time === 120 && !achievements.achievement3) {
@@ -212,7 +219,7 @@
                 document.getElementById('achievement3').textContent = '120 seconds (Completed)';
                 document.getElementById('achievement3').classList.remove('not-completed');
                 document.getElementById('achievement3').classList.add('completed');
-                showRedPopUp('120 seconds (Completed)');
+                showRainbowPopUp('Achievement Complete: 120 seconds');
             }
         }
 
@@ -258,12 +265,24 @@
             }, 3000);
         }
 
+        function showRainbowPopUp(text) {
+            const rainbowPopUpElement = document.getElementById('rainbowPopUp');
+            rainbowPopUpElement.textContent = text;
+            rainbowPopUpElement.style.display = 'block';
+
+            setTimeout(() => {
+                rainbowPopUpElement.style.display = 'none';
+            }, 3000);
+        }
+
         function saveGame() {
-            showBluePopUp('Saved');
+            // Add save functionality here
+            showBluePopUp('Game Saved');
         }
 
         function loadGame() {
-            showOrangePopUp('Loaded the save');
+            // Add load functionality here
+            showOrangePopUp('Game Loaded');
         }
 
         function showBluePopUp(text) {
