@@ -65,6 +65,7 @@
             text-align: center;
             border: 2px solid darkgrey;
             cursor: pointer;
+            border-radius: 20px;
         }
 
         .not-completed:hover {
@@ -165,6 +166,24 @@
                 transform: translateY(0);
             }
         }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            background-color: darkgrey;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #modal textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -179,15 +198,19 @@
         <button onclick="gainTime()">Gain Time</button>
         <div class="upgrade-tab" onclick="toggleUpgradeTab()">Upgrades</div>
         <div class="upgrade-content" id="upgradeContent">
-            <div>+1 Time Power</div>
-            <div class="upgrade-button" onclick="buyUpgrade()">Buy - <span id="upgradeCost">10</span> Secs</div>
-            <div>WIP</div>
+            <div>+1 Time Power (<span id="upgrade1Bought">x0</span> Bought)</div>
+            <div class="upgrade-button" onclick="buyUpgrade1()">Buy - <span id="upgradeCost">10</span> Secs</div>
+            <div id="autoClickUpgrade" style="display:none;">
+                Auto Click (<span id="autoClickBought">x0</span> Bought)
+                <div class="upgrade-button" onclick="buyUpgrade2()">Buy - 15 Secs</div>
+            </div>
         </div>
     </div>
 
     <div id="optionsContent">
         <button onclick="saveGame()">Save</button>
         <button onclick="loadGame()">Load</button>
+        <button onclick="copySave()">Copy Save</button>
     </div>
 
     <div id="achievementContent">
@@ -199,7 +222,7 @@
         </div>
     </div>
 
-    <div id="version">v0.1.0p</div>
+    <div id="version">v0.1.1p</div>
     <div class="pop-up red-pop-up" id="redPopUp"></div>
     <div class="pop-up green-pop-up" id="greenPopUp"></div>
     <div class="pop-up blue-pop-up" id="bluePopUp"></div>
@@ -207,8 +230,19 @@
     <div class="pop-up rainbow-pop-up" id="rainbowPopUp"></div>
     <div class="pop-up grey-pop-up" id="greyPopUp"></div>
 
+    <div id="modal">
+        <div>Input Save</div>
+        <textarea id="saveInput"></textarea>
+        <button onclick="loadSave()">Load</button>
+        <button onclick="closeModal()">Cancel</button>
+    </div>
+
     <script>
         let time = 0;
+        let upgrades = {
+            upgrade1: 0,
+            autoClick: 0
+        };
         let achievements = {
             achievement1: false,
             achievement2: false,
@@ -229,7 +263,7 @@
         }
 
         function gainTime() {
-            time++;
+            time += 1 + upgrades.upgrade1;
             updateTimer();
             checkAchievements();
         }
@@ -245,28 +279,22 @@
         }
 
         function checkAchievements() {
-            if (time === 1 && !achievements.achievement1) {
+            if (time >= 1 && !achievements.achievement1) {
                 achievements.achievement1 = true;
-                document.getElementById('achievement1').textContent = 'First second!!.!.!.! (Completed)';
-                document.getElementById('achievement1').classList.remove('not-completed');
-                document.getElementById('achievement1').classList.add('completed');
-                showRainbowPopUp('Achievement Complete: First second!!.!.!.!');
+                showGreenPopUp('Achievement Unlocked: First second!!.!.!.!');
+                updateAchievements();
             }
 
-            if (time === 60 && !achievements.achievement2) {
+            if (time >= 60 && !achievements.achievement2) {
                 achievements.achievement2 = true;
-                document.getElementById('achievement2').textContent = '1 minute (Completed)';
-                document.getElementById('achievement2').classList.remove('not-completed');
-                document.getElementById('achievement2').classList.add('completed');
-                showRainbowPopUp('Achievement Complete: 1 minute');
+                showGreenPopUp('Achievement Unlocked: 1 minute');
+                updateAchievements();
             }
 
-            if (time === 120 && !achievements.achievement3) {
+            if (time >= 120 && !achievements.achievement3) {
                 achievements.achievement3 = true;
-                document.getElementById('achievement3').textContent = '120 seconds (Completed)';
-                document.getElementById('achievement3').classList.remove('not-completed');
-                document.getElementById('achievement3').classList.add('completed');
-                showRainbowPopUp('Achievement Complete: 120 seconds');
+                showGreenPopUp('Achievement Unlocked: 120 seconds');
+                updateAchievements();
             }
         }
 
@@ -274,7 +302,7 @@
             for (const achievement in achievements) {
                 const achievementElement = document.getElementById(achievement);
                 if (achievements[achievement]) {
-                    achievementElement.textContent = `${achievementElement.textContent.replace('(Completed)', '')} (Completed)`;
+                    achievementElement.innerHTML = achievement.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2').replace(/([a-zA-Z])(\d)/g, '$1 $2').replace(/(\d)([a-zA-Z])/g, '$1 $2');
                     achievementElement.classList.remove('not-completed');
                     achievementElement.classList.add('completed');
                 } else {
@@ -313,16 +341,6 @@
             }, 3000);
         }
 
-        function showRainbowPopUp(text) {
-            const rainbowPopUpElement = document.getElementById('rainbowPopUp');
-            rainbowPopUpElement.textContent = text;
-            rainbowPopUpElement.style.display = 'block';
-
-            setTimeout(() => {
-                rainbowPopUpElement.style.display = 'none';
-            }, 3000);
-        }
-
         function showBluePopUp(text) {
             const bluePopUpElement = document.getElementById('bluePopUp');
             bluePopUpElement.textContent = text;
@@ -340,6 +358,16 @@
 
             setTimeout(() => {
                 orangePopUpElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function showRainbowPopUp(text) {
+            const rainbowPopUpElement = document.getElementById('rainbowPopUp');
+            rainbowPopUpElement.textContent = text;
+            rainbowPopUpElement.style.display = 'block';
+
+            setTimeout(() => {
+                rainbowPopUpElement.style.display = 'none';
             }, 3000);
         }
 
@@ -362,26 +390,90 @@
             }
         }
 
-        function buyUpgrade() {
+        function buyUpgrade1() {
             if (time >= upgradeCost) {
                 time -= upgradeCost;
+                upgrades.upgrade1 += 1;
                 upgradeCost += Math.floor(upgradeCost / 4.5);
-                updateTimer();
                 document.getElementById('upgradeCost').textContent = upgradeCost;
+                document.getElementById('upgrade1Bought').textContent = `x${upgrades.upgrade1}`;
+                updateTimer();
                 showWhitePopUp('Purchased');
+
+                // Show the Auto Click upgrade
+                document.getElementById('autoClickUpgrade').style.display = 'block';
             } else {
                 showWhitePopUp('Purchase Failed');
             }
         }
 
+        function buyUpgrade2() {
+            const autoClickCost = 15;
+            if (time >= autoClickCost) {
+                time -= autoClickCost;
+                upgrades.autoClick += 1;
+                document.getElementById('autoClickBought').textContent = `x${upgrades.autoClick}`;
+                updateTimer();
+                showWhitePopUp('Purchased');
+
+                // Start auto clicking
+                startAutoClick();
+            } else {
+                showWhitePopUp('Purchase Failed');
+            }
+        }
+
+        function startAutoClick() {
+            setInterval(() => {
+                for (let i = 0; i < upgrades.autoClick; i++) {
+                    gainTime();
+                }
+            }, 1000);
+        }
+
         function saveGame() {
-            // Add save functionality here
+            const saveData = {
+                time,
+                upgrades,
+                achievements
+            };
+            const encodedSave = btoa(JSON.stringify(saveData));
             showBluePopUp('Game Saved');
+            return encodedSave;
+        }
+
+        function copySave() {
+            const encodedSave = saveGame();
+            navigator.clipboard.writeText(encodedSave).then(() => {
+                showBluePopUp('Save Copied to Clipboard');
+            });
         }
 
         function loadGame() {
-            // Add load functionality here
-            showOrangePopUp('Game Loaded');
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function loadSave() {
+            const saveString = document.getElementById('saveInput').value;
+            try {
+                const decodedSave = JSON.parse(atob(saveString));
+                time = decodedSave.time;
+                upgrades = decodedSave.upgrades;
+                achievements = decodedSave.achievements;
+
+                document.getElementById('upgrade1Bought').textContent = `x${upgrades.upgrade1}`;
+                document.getElementById('autoClickBought').textContent = `x${upgrades.autoClick}`;
+                updateTimer();
+                updateAchievements();
+                closeModal();
+                showOrangePopUp('Game Loaded');
+            } catch (error) {
+                showRedPopUp('Invalid Save');
+            }
         }
 
         function showWhitePopUp(text) {
