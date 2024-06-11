@@ -34,6 +34,8 @@
 
         #timer {
             font-size: 125%;
+            color: white;
+            text-align: center;
         }
 
         #version {
@@ -114,6 +116,45 @@
             animation: popUpAnimation 0.5s ease;
         }
 
+        .grey-pop-up {
+            background-color: grey;
+            color: white;
+            animation: popUpAnimation 0.5s ease;
+        }
+
+        .upgrade-tab {
+            margin-top: 20px;
+            width: 100%;
+            background-color: darkgrey;
+            color: black;
+            cursor: pointer;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .upgrade-content {
+            display: none;
+            background-color: darkgrey;
+            color: black;
+            padding: 10px;
+            width: 65%;
+            margin: auto;
+        }
+
+        .upgrade-button {
+            background-color: darkteal;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .upgrade-button:hover {
+            background-color: teal;
+        }
+
         @keyframes popUpAnimation {
             from {
                 opacity: 0;
@@ -134,8 +175,14 @@
     </div>
 
     <div id="mainContent">
-        <div id="timer">You waited 0 years, 0 months, 0 days, 0 hours, 0 minutes, 0 seconds</div>
+        <div id="timer">You had waited for<br>0 Days, 00 hrs 00 mins 00 secs</div>
         <button onclick="gainTime()">Gain Time</button>
+        <div class="upgrade-tab" onclick="toggleUpgradeTab()">Upgrades</div>
+        <div class="upgrade-content" id="upgradeContent">
+            <div>+1 Time Power</div>
+            <div class="upgrade-button" onclick="buyUpgrade()">Buy - <span id="upgradeCost">10</span> Secs</div>
+            <div>WIP</div>
+        </div>
     </div>
 
     <div id="optionsContent">
@@ -152,12 +199,13 @@
         </div>
     </div>
 
-    <div id="version">v0.0.5p</div>
+    <div id="version">v0.1.0p</div>
     <div class="pop-up red-pop-up" id="redPopUp"></div>
     <div class="pop-up green-pop-up" id="greenPopUp"></div>
     <div class="pop-up blue-pop-up" id="bluePopUp"></div>
     <div class="pop-up orange-pop-up" id="orangePopUp"></div>
     <div class="pop-up rainbow-pop-up" id="rainbowPopUp"></div>
+    <div class="pop-up grey-pop-up" id="greyPopUp"></div>
 
     <script>
         let time = 0;
@@ -166,6 +214,7 @@
             achievement2: false,
             achievement3: false
         };
+        let upgradeCost = 10;
 
         function showTab(tabId) {
             document.getElementById('mainContent').style.display = 'none';
@@ -186,15 +235,13 @@
         }
 
         function updateTimer() {
-            const years = Math.floor(time / (365 * 24 * 60 * 60));
-            const months = Math.floor((time % (365 * 24 * 60 * 60)) / (30 * 24 * 60 * 60));
-            const days = Math.floor((time % (30 * 24 * 60 * 60)) / (24 * 60 * 60));
+            const days = Math.floor(time / (24 * 60 * 60));
             const hours = Math.floor((time % (24 * 60 * 60)) / (60 * 60));
             const minutes = Math.floor((time % (60 * 60)) / 60);
             const seconds = time % 60;
 
             const timerElement = document.getElementById('timer');
-            timerElement.textContent = `You waited ${years} years, ${months} months, ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+            timerElement.innerHTML = `You had waited for<br>${days} Days, ${hours.toString().padStart(2, '0')} hrs ${minutes.toString().padStart(2, '0')} mins ${seconds.toString().padStart(2, '0')} secs`;
         }
 
         function checkAchievements() {
@@ -238,8 +285,9 @@
         }
 
         function completeAchievement(achievementText) {
-            if (achievements[achievementText.toLowerCase()]) {
-                showGreenPopUp('The Achievement is already Completed');
+            const achievementKey = Object.keys(achievements).find(key => key.toLowerCase().includes(achievementText.toLowerCase().replace(/\s+/g, '')));
+            if (achievements[achievementKey]) {
+                showGreyPopUp('The Achievement is already Completed');
             } else {
                 showRedPopUp('The Achievement is not completed yet');
             }
@@ -275,16 +323,6 @@
             }, 3000);
         }
 
-        function saveGame() {
-            // Add save functionality here
-            showBluePopUp('Game Saved');
-        }
-
-        function loadGame() {
-            // Add load functionality here
-            showOrangePopUp('Game Loaded');
-        }
-
         function showBluePopUp(text) {
             const bluePopUpElement = document.getElementById('bluePopUp');
             bluePopUpElement.textContent = text;
@@ -302,6 +340,58 @@
 
             setTimeout(() => {
                 orangePopUpElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function showGreyPopUp(text) {
+            const greyPopUpElement = document.getElementById('greyPopUp');
+            greyPopUpElement.textContent = text;
+            greyPopUpElement.style.display = 'block';
+
+            setTimeout(() => {
+                greyPopUpElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function toggleUpgradeTab() {
+            const upgradeContent = document.getElementById('upgradeContent');
+            if (upgradeContent.style.display === 'block') {
+                upgradeContent.style.display = 'none';
+            } else {
+                upgradeContent.style.display = 'block';
+            }
+        }
+
+        function buyUpgrade() {
+            if (time >= upgradeCost) {
+                time -= upgradeCost;
+                upgradeCost += Math.floor(upgradeCost / 4.5);
+                updateTimer();
+                document.getElementById('upgradeCost').textContent = upgradeCost;
+                showWhitePopUp('Purchased');
+            } else {
+                showWhitePopUp('Purchase Failed');
+            }
+        }
+
+        function saveGame() {
+            // Add save functionality here
+            showBluePopUp('Game Saved');
+        }
+
+        function loadGame() {
+            // Add load functionality here
+            showOrangePopUp('Game Loaded');
+        }
+
+        function showWhitePopUp(text) {
+            const whitePopUpElement = document.createElement('div');
+            whitePopUpElement.textContent = text;
+            whitePopUpElement.style = 'display: block; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); padding: 10px; background-color: white; color: black; border-radius: 5px; text-align: center;';
+            document.body.appendChild(whitePopUpElement);
+
+            setTimeout(() => {
+                document.body.removeChild(whitePopUpElement);
             }, 3000);
         }
     </script>
