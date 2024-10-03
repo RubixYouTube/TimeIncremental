@@ -1,553 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Incremental Again</title>
-    <style>
-        body {
-            background-color: black;
-            color: darkgrey;
-            font-size: 16px;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        #tabs {
-            display: flex;
-            justify-content: space-around;
-            background-color: darkcyan;
-            padding: 10px;
-        }
-
-        #mainContent,
-        #optionsContent,
-        #achievementContent {
-            display: none;
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 125%;
-        }
-
-        #timer {
-            font-size: 125%;
-            text-align: center;
-        }
-
-        #version {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-        }
-
-        button {
-            padding: 10px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        .achievement-container {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .not-completed,
-        .completed {
-            width: 100%;
-            padding: 10px;
-            margin: 5px;
-            text-align: center;
-            border: 2px solid darkgrey;
-            cursor: pointer;
-            border-radius: 20px;
-        }
-
-        .not-completed:hover {
-            border-color: lightcoral;
-        }
-
-        .completed {
-            background-color: rgba(0, 255, 0, 0.1);
-            border-color: darkgreen;
-        }
-
-        .pop-up {
-            display: none;
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .red-pop-up {
-            background-color: darkred;
-            color: white;
-            animation: popUpAnimation 0.5s ease;
-        }
-
-        .green-pop-up {
-            background-color: darkgreen;
-            color: white;
-            animation: popUpAnimation 0.5s ease;
-        }
-
-        .blue-pop-up {
-            background-color: darkblue;
-            color: white;
-            animation: popUpAnimation 0.5s ease;
-        }
-
-        .orange-pop-up {
-            background-color: darkorange;
-            color: white;
-            animation: popUpAnimation 0.5s ease;
-        }
-
-        .grey-pop-up {
-            background-color: grey;
-            color: white;
-            animation: popUpAnimation 0.5s ease;
-        }
-
-        .rainbow-pop-up {
-            background: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red);
-            color: white;
-            animation: popUpAnimation 0.5s ease;
-        }
-
-        @keyframes popUpAnimation {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .upgrade-tab,
-        .time-shard-tab {
-            width: 65%;
-            display: none;
-            margin: 0 auto;
-            transition: all 0.3s ease;
-        }
-
-        .upgrade-tab.expanded,
-        .time-shard-tab.expanded {
-            display: block;
-        }
-
-        .tab-button {
-            display: block;
-            width: 65%;
-            margin: 10px auto;
-            text-align: center;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-button span {
-            float: right;
-        }
-
-        .read-only {
-            background-color: grey;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-
-<body>
-    <div id="tabs">
-        <div onclick="showTab('mainContent')">Main</div>
-        <div onclick="showTab('optionsContent')">Options</div>
-        <div onclick="showTab('achievementContent')">Achievements</div>
-    </div>
-
-    <div id="mainContent">
-        <div id="timer">You had waited for<br>0 Days, 00 hrs 00 mins 00 secs</div>
-        <button onclick="gainTime()">Gain Time</button>
-    </div>
-
-    <div id="optionsContent">
-        <button onclick="saveGame()">Save</button>
-        <button onclick="loadGame()">Load</button>
-        <button onclick="copySave()">Copy Save</button>
-    </div>
-
-    <div id="achievementContent">
-        <h1>Achievements</h1>
-        <div class="achievement-container">
-            <div class="not-completed" id="achievement1" onclick="completeAchievement('First second!!.!.!.!')">First second!!.!.!.!</div>
-            <div class="not-completed" id="achievement2" onclick="completeAchievement('1 minute')">1 minute</div>
-            <div class="not-completed" id="achievement3" onclick="completeAchievement('120 seconds')">120 seconds</div>
-        </div>
-    </div>
-
-    <div id="version">v0.1.4p</div>
-    <div class="pop-up red-pop-up" id="redPopUp"></div>
-    <div class="pop-up green-pop-up" id="greenPopUp"></div>
-    <div class="pop-up blue-pop-up" id="bluePopUp"></div>
-    <div class="pop-up orange-pop-up" id="orangePopUp"></div>
-    <div class="pop-up grey-pop-up" id="greyPopUp"></div>
-    <div class="pop-up rainbow-pop-up" id="rainbowPopUp"></div>
-
-    <div class="tab-button" onclick="toggleUpgradeTab()" id="upgradeToggle">Upgrades <span id="upgradeToggleArrow">^</span></div>
-    <div class="upgrade-tab" id="upgradeContent">
-        <div id="upgrade1">
-            <button onclick="buyUpgrade1()">Buy - 10 Secs</button> +1 Time Power <span id="upgrade1Bought">x0 Bought</span>
-        </div>
-        <div id="autoClickUpgrade" style="display:none;">
-            <button onclick="buyUpgrade2()">Buy - 15 Secs</button> Auto Click <span id="autoClickBought">x0 Bought</span>
-        </div>
-        <div id="timeBoostUpgrade" style="display:none;">
-            <button onclick="buyUpgrade3()">Buy - 20 Secs</button> Time Boost <span id="timeBoostBought">x0 Bought</span>
-        </div>
-        <div id="fasterAutoClickUpgrade" style="display:none;">
-            <button onclick="buyUpgrade4()">Buy - 30 Secs</button> Faster Auto Click <span id="fasterAutoClickBought">x0 Bought</span>
-        </div>
-        <div id="moreTimePowerUpgrade">
-            <button onclick="buyUpgrade5()">Buy - 50 Secs</button> More Time Power² <span id="moreTimePowerBought">x0 Bought</span>
-        </div>
-    </div>
-
-    <div class="tab-button" id="gainTimeShardsButton" onclick="gainTimeShards()">Gain Time Shards</div>
-
-    <div class="tab-button" onclick="toggleTimeShardTab()" id="timeShardToggle">Time Shards <span id="timeShardToggleArrow">^</span></div>
-    <div class="time-shard-tab" id="timeShardContent">
-        <p style="color: yellow;">You have</p>
-        <p style="font-size: 125%;">0</p>
-        <p style="color: yellow;">Time Pieces</p>
-        <div id="slowTimeGrindingUpgrade" style="display:none;">
-            <button onclick="buyUpgrade6()">Buy - 1 Time Shard</button> Slow Time Grinding <span id="slowTimeGrindingBought">x0 Bought</span>
-        </div>
-    </div>
-
-    <div id="modal" style="display:none;">
-        <div style="width: 50%; margin: auto; padding: 20px; background-color: darkgrey;">
-            <p>Input Save</p>
-            <textarea id="saveInput" style="width: 100%;"></textarea>
-            <button onclick="closeModal()">Cancel</button>
-            <button onclick="loadSave()">Load</button>
-        </div>
-    </div>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
     <script>
-        let time = 0;
-        let achievements = {
-            achievement1: false,
-            achievement2: false,
-            achievement3: false
-        };
-        let upgrades = {
-            upgrade1: 0,
-            autoClick: 0,
-            timeBoost: 0,
-            fasterAutoClick: 0,
-            moreTimePower: 0,
-            slowTimeGrinding: 0
-        };
-        let timeShards = 0;
+        document.addEventListener('DOMContentLoaded', function() {
+            let seconds = 0;
+            const timeDisplay = document.getElementById('time-display');
+            const miniStatsTime = document.getElementById('mini-stats-time');
 
-        function showTab(tabId) {
-            document.getElementById('mainContent').style.display = 'none';
-            document.getElementById('optionsContent').style.display = 'none';
-            document.getElementById('achievementContent').style.display = 'none';
-
-            document.getElementById(tabId).style.display = 'block';
-
-            if (tabId === 'achievementContent') {
-                updateAchievements();
-            }
-        }
-
-        function gainTime() {
-            time++;
-            updateTimer();
-            checkAchievements();
-        }
-
-        function updateTimer() {
-            const days = Math.floor(time / (24 * 60 * 60));
-            const hours = Math.floor((time % (24 * 60 * 60)) / (60 * 60));
-            const minutes = Math.floor((time % (60 * 60)) / 60);
-            const seconds = time % 60;
-
-            const timerElement = document.getElementById('timer');
-            timerElement.innerHTML = `You had waited for<br>${days} Days, ${hours.toString().padStart(2, '0')} hrs ${minutes.toString().padStart(2, '0')} mins ${seconds.toString().padStart(2, '0')} secs`;
-        }
-
-        function checkAchievements() {
-            if (time === 1 && !achievements.achievement1) {
-                achievements.achievement1 = true;
-                document.getElementById('achievement1').textContent = 'First second!!.!.!.! (Completed)';
-                document.getElementById('achievement1').classList.remove('not-completed');
-                document.getElementById('achievement1').classList.add('completed');
-                showRainbowPopUp('Achievement Complete: First second!!.!.!.!');
-            }
-
-            if (time === 60 && !achievements.achievement2) {
-                achievements.achievement2 = true;
-                document.getElementById('achievement2').textContent = '1 minute (Completed)';
-                document.getElementById('achievement2').classList.remove('not-completed');
-                document.getElementById('achievement2').classList.add('completed');
-                showRainbowPopUp('Achievement Complete: 1 minute');
-            }
-
-            if (time === 120 && !achievements.achievement3) {
-                achievements.achievement3 = true;
-                document.getElementById('achievement3').textContent = '120 seconds (Completed)';
-                document.getElementById('achievement3').classList.remove('not-completed');
-                document.getElementById('achievement3').classList.add('completed');
-                showRainbowPopUp('Achievement Complete: 120 seconds');
-            }
-        }
-
-        function updateAchievements() {
-            for (const achievement in achievements) {
-                const achievementElement = document.getElementById(achievement);
-                if (achievements[achievement]) {
-                    achievementElement.textContent = `${achievementElement.textContent.replace('(Completed)', '')} (Completed)`;
-                    achievementElement.classList.remove('not-completed');
-                    achievementElement.classList.add('completed');
-                } else {
-                    achievementElement.classList.remove('completed');
-                    achievementElement.classList.add('not-completed');
-                }
-            }
-        }
-
-        function completeAchievement(achievementText) {
-            const achievementKey = achievementText.toLowerCase().replace(/[\s!]+/g, '');
-            if (achievements[achievementKey]) {
-                showWhitePopUp('The Achievement is already Completed');
-            } else {
-                showRedPopUp('The Achievement is not completed yet');
-            }
-        }
-
-        function showRedPopUp(text) {
-            const redPopUpElement = document.getElementById('redPopUp');
-            redPopUpElement.textContent = text;
-            redPopUpElement.style.display = 'block';
-
-            setTimeout(() => {
-                redPopUpElement.style.display = 'none';
-            }, 3000);
-        }
-
-        function showWhitePopUp(text) {
-            const greyPopUpElement = document.getElementById('greyPopUp');
-            greyPopUpElement.textContent = text;
-            greyPopUpElement.style.display = 'block';
-
-            setTimeout(() => {
-                greyPopUpElement.style.display = 'none';
-            }, 3000);
-        }
-
-        function buyUpgrade1() {
-            if (time >= 10) {
-                time -= 10;
-                upgrades.upgrade1++;
-                document.getElementById('upgrade1Bought').textContent = `x${upgrades.upgrade1} Bought`;
-                showWhitePopUp('Purchased');
-                if (upgrades.upgrade1 === 1) {
-                    document.getElementById('autoClickUpgrade').style.display = 'block';
-                }
-                updateTimer();
-            } else {
-                showRedPopUp('Purchase Failed');
-            }
-        }
-
-        function buyUpgrade2() {
-            if (time >= 15) {
-                time -= 15;
-                upgrades.autoClick++;
-                document.getElementById('autoClickBought').textContent = `x${upgrades.autoClick} Bought`;
-                if (upgrades.autoClick === 1) {
-                    setInterval(gainTime, 1000);
-                }
-                showWhitePopUp('Purchased');
-                if (upgrades.autoClick === 1) {
-                    document.getElementById('timeBoostUpgrade').style.display = 'block';
-                }
-                if (upgrades.autoClick === 1) {
-                    document.getElementById('autoClickUpgrade').innerHTML = '<div class="read-only">MAX BOUGHT</div>';
-                }
-                updateTimer();
-            } else {
-                showRedPopUp('Purchase Failed');
-            }
-        }
-
-        function buyUpgrade3() {
-            if (time >= 20) {
-                time -= 20;
-                upgrades.timeBoost++;
-                document.getElementById('timeBoostBought').textContent = `x${upgrades.timeBoost} Bought`;
-                showWhitePopUp('Purchased');
-                if (upgrades.timeBoost === 1) {
-                    document.getElementById('fasterAutoClickUpgrade').style.display = 'block';
-                }
-                if (upgrades.timeBoost === 1) {
-                    document.getElementById('timeBoostUpgrade').innerHTML = '<div class="read-only">MAX BOUGHT</div>';
-                }
-                updateTimer();
-            } else {
-                showRedPopUp('Purchase Failed');
-            }
-        }
-
-        function buyUpgrade4() {
-            if (time >= 30) {
-                time -= 30;
-                upgrades.fasterAutoClick++;
-                document.getElementById('fasterAutoClickBought').textContent = `x${upgrades.fasterAutoClick} Bought`;
-                showWhitePopUp('Purchased');
-                if (upgrades.fasterAutoClick === 1) {
-                    document.getElementById('moreTimePowerUpgrade').style.display = 'block';
-                }
-                if (upgrades.fasterAutoClick === 2) {
-                    document.getElementById('fasterAutoClickUpgrade').innerHTML = '<div class="read-only">MAX BOUGHT</div>';
-                }
-                updateTimer();
-            } else {
-                showRedPopUp('Purchase Failed');
-            }
-        }
-
-        function buyUpgrade5() {
-            if (time >= 50) {
-                time -= 50;
-                upgrades.moreTimePower++;
-                document.getElementById('moreTimePowerBought').textContent = `x${upgrades.moreTimePower} Bought`;
-                showWhitePopUp('Purchased');
-                updateTimer();
-            } else {
-                showRedPopUp('Purchase Failed');
-            }
-        }
-
-        function buyUpgrade6() {
-            if (timeShards >= 1) {
-                timeShards -= 1;
-                upgrades.slowTimeGrinding++;
-                document.getElementById('slowTimeGrindingBought').textContent = `x${upgrades.slowTimeGrinding} Bought`;
-                showWhitePopUp('Purchased');
-                setInterval(() => {
-                    timeShards += 0.1;
-                    document.querySelector("#timeShardContent p:nth-child(2)").textContent = timeShards.toFixed(1);
-                }, 1000);
-                updateTimer();
-            } else {
-                showRedPopUp('Purchase Failed');
-            }
-        }
-
-        function saveGame() {
-            const saveData = btoa(JSON.stringify({ time, upgrades, achievements, timeShards }));
-            showBluePopUp('Game Saved');
-        }
-
-        function loadGame() {
-            document.getElementById('modal').style.display = 'block';
-        }
-
-        function loadSave() {
-            const saveData = JSON.parse(atob(document.getElementById('saveInput').value));
-            time = saveData.time;
-            upgrades = saveData.upgrades;
-            achievements = saveData.achievements;
-            timeShards = saveData.timeShards;
-            updateTimer();
-            updateAchievements();
-            closeModal();
-            showOrangePopUp('Game Loaded');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        function copySave() {
-            const saveData = btoa(JSON.stringify({ time, upgrades, achievements, timeShards }));
-            navigator.clipboard.writeText(saveData).then(() => {
-                showBluePopUp('Save Copied');
-            });
-        }
-
-        function toggleUpgradeTab() {
-            const upgradeTab = document.getElementById('upgradeContent');
-            const arrow = document.getElementById('upgradeToggleArrow');
-            if (upgradeTab.classList.contains('expanded')) {
-                upgradeTab.classList.remove('expanded');
-                arrow.textContent = '^';
-            } else {
-                upgradeTab.classList.add('expanded');
-                arrow.textContent = 'v';
-            }
-        }
-
-        function toggleTimeShardTab() {
-            const timeShardTab = document.getElementById('timeShardContent');
-            const arrow = document.getElementById('timeShardToggleArrow');
-            if (timeShardTab.classList.contains('expanded')) {
-                timeShardTab.classList.remove('expanded');
-                arrow.textContent = '^';
-            } else {
-                timeShardTab.classList.add('expanded');
-                arrow.textContent = 'v';
-            }
-        }
-
-        function gainTimeShards() {
-            if (time >= 15 * 60) {
-                time = 0;
-                timeShards++;
-                upgrades.upgrade1 = 0;
-                upgrades.autoClick = 0;
-                upgrades.timeBoost = 0;
-                upgrades.fasterAutoClick = 0;
-                upgrades.moreTimePower = 0;
-                upgrades.slowTimeGrinding = 0;
-                document.getElementById('upgrade1Bought').textContent = 'x0 Bought';
-                document.getElementById('autoClickBought').textContent = 'x0 Bought';
-                document.getElementById('timeBoostBought').textContent = 'x0 Bought';
-                document.getElementById('fasterAutoClickBought').textContent = 'x0 Bought';
-                document.getElementById('moreTimePowerBought').textContent = 'x0 Bought';
-                document.getElementById('slowTimeGrindingBought').textContent = 'x0 Bought';
-                document.getElementById('autoClickUpgrade').style.display = 'none';
-                document.getElementById('timeBoostUpgrade').style.display = 'none';
-                document.getElementById('fasterAutoClickUpgrade').style.display = 'none';
-                document.getElementById('moreTimePowerUpgrade').style.display = 'block';
-                showOrangePopUp('Time Shard Gained');
-                updateTimer();
-            } else {
-                showRedPopUp('Not enough time accumulated');
-            }
-        }
-
-        window.onload = () => {
-            showTab('mainContent');
-        }
+            setInterval(() => {
+                seconds++;
+                const timeString = `${Math.floor(seconds / 31536000)}y ${Math.floor((seconds % 31536000) / 86400)}d ${Math.floor((seconds % 86400) / 3600)}h ${Math.floor((seconds % 3600) / 60)}m ${seconds % 60}s.`;
+                timeDisplay.textContent = timeString;
+                miniStatsTime.textContent = `${seconds}s`;
+            }, 1000);
+        });
     </script>
+</head>
+<body class="bg-gray-800 text-white font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-1/5 bg-gray-700 p-4">
+            <div class="text-4xl font-bold mb-8">Time</div>
+            <div class="text-gray-400 text-2xl mb-4">Options</div>
+            <div class="text-gray-400 text-2xl mb-4">Changelog</div>
+            <div class="absolute bottom-4 left-4 text-blue-400 text-xl">v0.2.0a</div>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <div class="text-center mb-8">
+                <div class="text-2xl mb-2">You've waited</div>
+                <div id="time-display" class="text-5xl font-bold">0y 0d 0h 0m 0s.</div>
+                <div class="text-yellow-400 text-xl">1s/s</div>
+            </div>
+            <div class="flex justify-center space-x-8 mb-8">
+                <div class="bg-gray-900 p-4 border-2 border-white">
+                    <div class="text-xl mb-2">Entropy #0</div>
+                    <div class="bg-gray-800 p-4 border-2 border-white">
+                        <div>Entropy up but</div>
+                        <div>Your time gain is sped up by 1.25x</div>
+                        <div class="mt-4">REQUIRE: 10s</div>
+                    </div>
+                </div>
+                <div class="bg-gray-900 p-4 border-2 border-blue-400">
+                    <div class="text-xl mb-2">Entropy² #0</div>
+                    <div class="bg-gray-800 p-4 border-2 border-blue-400">
+                        <div>Entropy² Up But</div>
+                        <div>Entropy Requirements is decreased by 25%</div>
+                        <div class="mt-4">REQUIRE Entropy #10</div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <div class="text-xl mb-2">Cost: 10s</div>
+                <div class="flex justify-center items-center mb-4">
+                    <div class="bg-gray-900 p-4 border-2 border-white flex items-center">
+                        <i class="fas fa-arrow-up text-green-400 text-2xl mr-2"></i>
+                        <div>
+                            <div class="text-xl">Time Boost</div>
+                            <div>Adds Time gain by +1s</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-xl mb-2">Boosts Upgrade 1 By 10%</div>
+                <div class="flex justify-center items-center">
+                    <div class="bg-gray-900 p-4 border-2 border-white flex items-center">
+                        <i class="fas fa-arrow-up text-yellow-400 text-2xl mr-2"></i>
+                        <i class="fas fa-arrow-up text-yellow-400 text-2xl mr-2"></i>
+                        <div>
+                            <div class="text-xl">Time Boost</div>
+                            <div>Cost: 45s</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Right Sidebar -->
+        <div class="w-1/5 bg-gray-700 p-4 flex flex-col items-center">
+            <div class="flex items-center mb-4">
+                <div class="bg-gray-800 p-4 border-2 border-white flex items-center justify-center w-12 h-12">
+                    <i class="fas fa-clock text-white text-2xl"></i>
+                </div>
+                <div id="mini-stats-time" class="text-2xl ml-2">0s</div>
+            </div>
+            <div class="flex flex-col items-center space-y-4">
+                <div class="bg-gray-800 p-4 border-2 border-blue-400 flex items-center justify-center w-12 h-12">
+                    <span class="text-cyan-400 text-2xl font-bold">ε</span>
+                </div>
+                <div class="bg-gray-800 p-4 border-2 border-blue-400 flex items-center justify-center w-12 h-12">
+                    <span class="text-blue-400 text-2xl">ε<sup>2</sup></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
-
 </html>
