@@ -5,33 +5,64 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let seconds = 0;
+            let timeGain = 1;
             const timeDisplay = document.getElementById('time-display');
             const miniStatsTime = document.getElementById('mini-stats-time');
+            const timeBoostButton = document.getElementById('time-boost-button');
+            const timeGainDisplay = document.getElementById('time-gain-display');
+            const timeBoostCost = 10;
+
+            function abbreviateNumber(value) {
+                let newValue = value;
+                const suffixes = ["", "k", "M", "B","T"];
+                let suffixNum = 0;
+                while (newValue >= 1000) {
+                    newValue /= 1000;
+                    suffixNum++;
+                }
+                return newValue.toPrecision(3) + suffixes[suffixNum];
+            }
 
             setInterval(() => {
-                seconds++;
+                seconds += timeGain;
                 const timeString = `${Math.floor(seconds / 31536000)}y ${Math.floor((seconds % 31536000) / 86400)}d ${Math.floor((seconds % 86400) / 3600)}h ${Math.floor((seconds % 3600) / 60)}m ${seconds % 60}s.`;
                 timeDisplay.textContent = timeString;
-                miniStatsTime.textContent = `${seconds}s`;
+                miniStatsTime.textContent = abbreviateNumber(seconds) + "s";
+                timeGainDisplay.textContent = `${timeGain}s/s`;
             }, 1000);
+
+            timeBoostButton.addEventListener('click', () => {
+                if (seconds >= timeBoostCost) {
+                    seconds -= timeBoostCost;
+                    timeGain += 1;
+                }
+            });
+
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('bg-green-500'));
+                    tab.classList.add('bg-green-500');
+                });
+            });
         });
     </script>
 </head>
-<body class="bg-gray-800 text-white font-sans">
-    <div class="flex h-screen">
+<body class="bg-gray-800 text-white font-sans h-screen">
+    <div class="flex h-full">
         <!-- Sidebar -->
-        <div class="w-1/5 bg-gray-700 p-4">
-            <div class="text-4xl font-bold mb-8">Time</div>
-            <div class="text-gray-400 text-2xl mb-4">Options</div>
-            <div class="text-gray-400 text-2xl mb-4">Changelog</div>
-            <div class="absolute bottom-4 left-4 text-blue-400 text-xl">v0.2.0a</div>
+        <div class="w-1/5 bg-gray-700 p-4 flex flex-col">
+            <div class="tab p-2 mb-4 border-2 border-white cursor-pointer transition-colors duration-300 bg-green-500">Time</div>
+            <div class="tab p-2 mb-4 border-2 border-white cursor-pointer transition-colors duration-300">Options</div>
+            <div class="tab p-2 mb-4 border-2 border-white cursor-pointer transition-colors duration-300">Changelog</div>
+            <div class="absolute bottom-4 left-4 text-blue-400 text-xl">v0.2.1a</div>
         </div>
         <!-- Main Content -->
-        <div class="flex-1 p-8">
+        <div class="flex-1 p-8 overflow-auto">
             <div class="text-center mb-8">
                 <div class="text-2xl mb-2">You've waited</div>
                 <div id="time-display" class="text-5xl font-bold">0y 0d 0h 0m 0s.</div>
-                <div class="text-yellow-400 text-xl">1s/s</div>
+                <div id="time-gain-display" class="text-yellow-400 text-xl">1s/s</div>
             </div>
             <div class="flex justify-center space-x-8 mb-8">
                 <div class="bg-gray-900 p-4 border-2 border-white">
@@ -54,7 +85,7 @@
             <div class="text-center">
                 <div class="text-xl mb-2">Cost: 10s</div>
                 <div class="flex justify-center items-center mb-4">
-                    <div class="bg-gray-900 p-4 border-2 border-white flex items-center">
+                    <div id="time-boost-button" class="bg-gray-900 p-4 border-2 border-white flex items-center cursor-pointer">
                         <i class="fas fa-arrow-up text-green-400 text-2xl mr-2"></i>
                         <div>
                             <div class="text-xl">Time Boost</div>
@@ -78,10 +109,10 @@
         <!-- Right Sidebar -->
         <div class="w-1/5 bg-gray-700 p-4 flex flex-col items-center">
             <div class="flex items-center mb-4">
+                <div id="mini-stats-time" class="text-2xl mr-2">0s</div>
                 <div class="bg-gray-800 p-4 border-2 border-white flex items-center justify-center w-12 h-12">
                     <i class="fas fa-clock text-white text-2xl"></i>
                 </div>
-                <div id="mini-stats-time" class="text-2xl ml-2">0s</div>
             </div>
             <div class="flex flex-col items-center space-y-4">
                 <div class="bg-gray-800 p-4 border-2 border-blue-400 flex items-center justify-center w-12 h-12">
